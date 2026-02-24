@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              String       @id @unique @default(uuid())
+  username        String       @unique @db.VarChar(100)
+  password        String       @db.VarChar(100)
+  phone           String       @db.VarChar(20)
+  email           String       @unique @db.VarChar(100)
+  address         String       @db.VarChar(500)
+  birth           DateTime?
+  isVerified      Boolean      @default(false)
+  verifyExpiredAt DateTime?
+  verifyToken     String?
+  createdAt       DateTime     @default(now())
+  role            Role         @default(USER)
+  imageProfile    String?      @db.VarChar(400)
+  devices         UserDevice[]
+}
+
+model UserDevice {
+  id         String   @id @default(uuid())
+  userId     String
+  deviceCode String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, deviceCode])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Detection_sessions{
+  id String @id @default(cuid())
+  startedAt DateTime @default(now())
+  endedAt DateTime?
+  totalBaik Int @default(0)
+  totalCacat Int @default(0)
+  
+  records Detection_records[]
+
+  monthSummaryId String?
+  monthSummary Detection_monthly? @relation(fields: [monthSummaryId], references: [id], onDelete: SetNull)
+
+  @@index([startedAt])
+  @@index([monthSummaryId])
+}
+
+model Detection_records{
+  id String @id @default(cuid())
+  timestamp DateTime @default(now())
+
+  baik Int
+  cacat Int
+  totalBaik Int
+  totalCacat Int
+
+  sessionId String
+  session Detection_sessions @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  @@index([sessionId])
+  @@index([timestamp])
+}
+
+model Detection_monthly {
+  id String @id @default(cuid())
+  year Int 
+  month Int 
+  updatedAt DateTime @updatedAt
+
+  totalBaik Int @default(0)
+  totalCacat Int @default(0)
+  totalPanen Int @default(0)
+
+  avgBaikPerSesi Float @default(0)
+  avgCacatPerSesi Float @default(0)
+  persenBaik Float @default(0)
+
+  jumlahSesi Int @default(0)
+
+  sessions Detection_sessions[]
+  @@unique([year, month])
+  @@index([year])
+}
