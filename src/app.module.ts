@@ -4,10 +4,11 @@ import { AppService } from './app.service';
 import { DeviceService } from './device/device.service';
 import { DatabaseService } from './database/database.service';
 import { DeviceModule } from './device/device.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
-  imports: [DeviceModule],
+  imports: [DeviceModule, DatabaseModule],
   controllers: [AppController],
-  providers: [AppService, DeviceService, DatabaseService],
+  providers: [AppService],
 })
 export class AppModule {}
